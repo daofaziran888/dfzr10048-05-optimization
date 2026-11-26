@@ -81,5 +81,22 @@ npm run dev
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
 
+## 发布复核
+
+转写版本发布前要按该版本自己的生效阈值核对低置信段与签名，复核员从待办领取仍缺签名的段：
+
+| 接口 | 说明 |
+| --- | --- |
+| `GET /api/transcript_version/{版本}/release-review` | 发布复核明细：生效阈值、每段签名判定、有效/失效签名、需谁重审 |
+| `POST /api/transcript_version/{版本}/release` | 制作人点发布：覆盖不完整时返回明细并阻断 |
+| `GET /api/confidence_review/todo?version={版本}` | 复核待办：只列仍缺有效签名的段 |
+| `POST /api/confidence_review/claim` | 领取段，签名口径锁定为领取时的阈值 |
+| `POST /api/confidence_review/signature` | 提交段签名 |
+
+口径：
+- 每段必须有**对该段和该版本**的签名；一段的签名不能替邻段通过，也不能跨版本复用。
+- 阈值按版本生效，已交付的旧版本继续展示自己的阈值与签名，不受新版本调高影响。
+- 按旧阈值领取、调高阈值后才提交的签名判为失效，需按新阈值重审；已审段数按段去重，重复签署不增加。
+
 领域：数据工程
 子方向：数据采集、爬虫与RPA
